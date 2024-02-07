@@ -123,4 +123,19 @@ plt.xticks(rotation=44, ha='right')
 plt.tight_layout()
 plt.show()
 
-    
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+# Combine all reviews into a single string
+all_reviews = ' '.join(df['ReviewBody'])
+
+# Generate the word cloud
+wordcloud = WordCloud(width=800, height=400, background_color='white', colormap='viridis').generate(all_reviews)
+
+# Display the word cloud using matplotlib
+plt.figure(figsize=(10, 8))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.title('Word Cloud of Airline Reviews')
+plt.show()
+   
