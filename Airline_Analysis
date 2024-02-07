@@ -1,0 +1,126 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns  
+
+# Define the full path to your CSV file
+file_path = "/home/angel/Documents/workspace/Data_Science/Airline_Review/BA_AirlineReviews.csv"
+
+# Read the CSV file into a pandas DataFrame
+df = pd.read_csv(file_path, encoding='utf-8')
+print(df.head())  # Print the first few rows of the DataFrame
+print(df.tail(20)) # Print the last few rows
+print(df.info())
+print(df.describe())
+
+# Data Quality Assessment 
+print(df.isnull().any().sum)
+
+# Check the number of null entries in each column
+null_counts = df.isnull().sum()
+
+# Print the number of null entries in each column
+print(null_counts)
+
+# Check for duplicates 
+print(df.duplicated())
+df.dropna(inplace=True)
+print(df.isnull().any().sum())
+print(null_counts)
+df.isnull().any().sum()
+
+# Confirm null values in the dataset
+null_values_exist = df.isnull().any().any()
+
+if null_values_exist:
+    print("There are null values in the dataset.")
+else:
+    print("There are no null values in the dataset.")
+
+# Checking for outliers 
+numeric_columns = df.select_dtypes(include=['float64','int64']).columns
+
+for column in numeric_columns:
+    plt.figure(figsize=(8,6))
+    plt.scatter(df.index, df[column])
+    plt.title(f'Scatter plot for {column}')
+    plt.xlabel('index')
+    plt.ylabel(column)
+    plt.show()
+
+# Print value counts for 'TypeOfTraveller' and 'SeatType' columns
+print(df['TypeOfTraveller'].value_counts())
+print(df['SeatType'].value_counts())
+
+# A Plot to check the curve of reviews from customers 
+from dateutil import parser
+
+df['Datetime']= df['Datetime'].apply(lambda x: parser.parse(x))
+
+df.set_index('Datetime', inplace=True)
+
+resampled_df = df.resample('M').size()
+
+plt.figure(figsize=(10,6))
+resampled_df.plot(title='Airline Review Over Time', xlabel='Date', ylabel='Number of Reviews', legend=False)
+plt.show()
+
+
+
+# Scatter plot: OverallRating vs. SeatComfort by TypeOfTraveller
+plt.figure(figsize=(10,6))
+sns.scatterplot(x='OverallRating', y='SeatComfort', data=df, hue='TypeOfTraveller', palette='viridis')
+plt.title('Scatter Plot: OverallRating vs. SeatComfort by TypeOfTraveller')
+plt.show()
+
+# Calculate correlation matrix
+numerical_features = ['OverallRating', 'SeatComfort']
+correlation_matrix = df[numerical_features].corr()
+
+# Heatmap: Correlation Matrix between Numerical Features
+plt.figure(figsize=(8,6))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', linewidths=.5)
+plt.title('Heatmap: Correlation Matrix between Numerical Features')
+plt.show()
+
+
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Download the VADER lexicon if not already downloaded
+nltk.download('vader_lexicon')
+
+# Initialize the VADER sentiment analyzer
+sid = SentimentIntensityAnalyzer()
+
+# Define a function to get sentiment using VADER
+def get_sentiment(text):
+    scores = sid.polarity_scores(text)
+    compound_score = scores['compound']
+    if compound_score >= 0.05:
+        return 'positive'
+    elif compound_score <= -0.05:
+        return 'negative'
+    else:
+        return 'neutral'
+
+# Assuming df is your DataFrame containing reviews
+# df['ReviewBody'] should be the column containing the review text
+# df['Aircraft'] should be the column containing the aircraft information
+
+# Apply the sentiment analysis function to the review text
+df['Sentiment'] = df['ReviewBody'].apply(get_sentiment)
+
+# Plot the sentiment distribution across airlines
+plt.figure(figsize=(14, 6))
+sns.countplot(x='Aircraft', hue='Sentiment', data=df, palette='viridis')
+plt.title('Sentiment Distribution Across Airlines')
+plt.xlabel('Aircraft')
+plt.ylabel('Count')
+plt.xticks(rotation=44, ha='right')
+plt.tight_layout()
+plt.show()
+
+    
